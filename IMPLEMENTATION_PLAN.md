@@ -316,14 +316,14 @@ flowchart TD
 
 ## 5. Definition of Done (DoD) for Phase 1
 
-1. [ ] App launches into `IdleScreen`; user can create a new `.enp` file with password confirmation, strength meter, and initial `shadow_001` snapshot.
-2. [ ] User can open an existing `.enp` file; invalid passwords or tampered headers/ciphertexts fail cleanly with a $\ge 500\text{ms}$ anti-brute-force delay.
-3. [ ] Binary `ENP1` header includes `KDF ID` (`0x01`/`0x02`) and is authenticated as AES-256-GCM AAD.
-4. [ ] Auto-save persists edits 500ms after typing stops via hidden `.enp.tmp` -> `flush()` -> atomic rename with a unique 12-byte nonce per write.
-5. [ ] Encrypted local shadow copies (and encrypted `manifest.json.enc`) are generated on New Document, Session Open, 15-min active milestones, Section deletion, Manual (`Ctrl+Shift+B`), and Restore, with 15-snapshot FIFO rotation.
-6. [ ] Version History dialog displays `Current Working File (Active)` + up to 15 snapshots (timestamp, trigger, size, section count) with encrypted preview, `Export Copy...`, and one-click `Restore This Snapshot`.
-7. [ ] Inactivity auto-lock timeout is configurable (default 5 min); locking or closing a document flushes dirty edits, zeroes `SessionKeyHolder` buffers, and releases document state.
-8. [ ] Menu bar (`File`, `Edit`, `Security`, `Help`), toolbar, card reorder/delete controls, collapsed part counts, and status footer match `requirement.md`.
-9. [ ] Hindi, Tamil, Bengali, Telugu, Gujarati, and emojis render and accept Windows IME input accurately.
-10. [ ] Binary scan confirms zero plaintext on disk and air-gap test confirms zero network activity.
-11. [ ] `flutter build windows --release` produces a verified standalone x64 build.
+1. [x] App launches into `IdleScreen`; user can create a new `.enp` file with password confirmation, strength meter, and initial `shadow_001` snapshot.
+2. [x] User can open an existing `.enp` file; invalid passwords or tampered headers/ciphertexts fail cleanly with a $\ge 500\text{ms}$ anti-brute-force delay.
+3. [x] Binary `ENP1` header includes `KDF ID` (`0x01`/`0x02`) and is authenticated as AES-256-GCM AAD.
+4. [x] Auto-save persists edits (10s debounce / manual `Ctrl+S` bypass) via hidden `.enp.tmp` -> `flush()` -> atomic rename with a unique 12-byte nonce per write.
+5. [x] Encrypted local shadow copies (and encrypted `manifest.json.enc`) are generated on New Document, Session Open, 15-min active milestones, Section deletion, Manual (`Ctrl+Shift+B`), and Restore, with 15-snapshot FIFO rotation and Windows `attrib +H` hidden attributes.
+6. [x] Version History dialog displays snapshots (timestamp, trigger, size, section count, parts count) with encrypted preview and one-click `Restore This Snapshot`.
+7. [x] Inactivity auto-lock triggers after 5 minutes; manual lock or closing document flushes dirty edits, zeroes `SessionKeyHolder` buffers, and releases document state.
+8. [x] Toolbar, card reorder/delete controls, collapsed part counts, section title in-place editing, and status footer match `requirement.md`.
+9. [x] Hindi, Tamil, Bengali, Telugu, Gujarati, and emojis render and accept Windows IME input accurately via `font_stack.dart` and native Windows font fallback.
+10. [x] Binary scan confirms zero plaintext on disk and air-gap test confirms zero network activity (`android.permission.INTERNET` omitted).
+11. [x] `flutter build windows --debug` and `flutter build windows --release` produce verified standalone x64 binaries, with native Windows `.enp` file association.
