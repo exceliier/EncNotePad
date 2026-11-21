@@ -1,0 +1,24 @@
+# Root Git Ignore for EncNotePad
+
+# Flutter / Dart build artifacts & cache
+encnotepad/.dart_tool/
+encnotepad/.flutter-plugins
+encnotepad/.flutter-plugins-dependencies
+encnotepad/.packages
+encnotepad/.pub-cache/
+encnotepad/.pub/
+encnotepad/build/
+encnotepad/coverage/
+
+# OS and Transient files
+.DS_Store
+Thumbs.db
+*.tmp
+*.enp.tmp
+.*_shadows/
+test_vault.enp
+
+# IDE & Editor settings
+.vscode/
+.idea/
+*.iml
