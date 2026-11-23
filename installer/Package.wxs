@@ -1,4 +1,4 @@
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Package Name="EncNotePad"
            Manufacturer="EncNotePad Team"
            Version="1.0.0.0"
@@ -44,6 +44,162 @@
         <Component Id="ScreenRetrieverDll" Guid="C3D4E5F6-A1B2-9012-CDEF-123456789012">
           <File Source="..\encnotepad\build\windows\x64\runner\Release\screen_retriever_plugin.dll" KeyPath="yes" />
         </Component>
+
+        <!-- Unified Windows 8.1 / 10 / 11 Runtime DLLs (VC++ 2015-2022, UCRT, & Path API Shim) -->
+        <Component Id="Redist_1" Guid="06B72B82-3F22-4747-8172-DF22D116FB7D">
+          <File Id="Fld_1" Source="redist_x64\api-ms-win-core-console-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_2" Guid="5B7BD7DC-DF66-4B37-8CA6-07E13ECBE489">
+          <File Id="Fld_2" Source="redist_x64\api-ms-win-core-datetime-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_3" Guid="A542D512-F59A-4E3F-A30D-0887383EC19E">
+          <File Id="Fld_3" Source="redist_x64\api-ms-win-core-debug-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_4" Guid="2F6CD3DB-AF4C-4C52-8B49-3291CA2A703E">
+          <File Id="Fld_4" Source="redist_x64\api-ms-win-core-errorhandling-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_5" Guid="DD09F7B6-FF56-4951-83E0-DBE43BE31712">
+          <File Id="Fld_5" Source="redist_x64\api-ms-win-core-file-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_6" Guid="42958D21-9788-48C4-9B42-0D5C3BBE9936">
+          <File Id="Fld_6" Source="redist_x64\api-ms-win-core-file-l1-2-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_7" Guid="2ECF7356-D2CE-4589-A62B-E30EB2016C35">
+          <File Id="Fld_7" Source="redist_x64\api-ms-win-core-file-l2-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_8" Guid="48C5D1B7-F2EB-4594-8B3C-083D0FECEA68">
+          <File Id="Fld_8" Source="redist_x64\api-ms-win-core-handle-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_9" Guid="D1047CC8-0AC3-4FF1-9227-6A35FA0D4D5E">
+          <File Id="Fld_9" Source="redist_x64\api-ms-win-core-heap-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_10" Guid="61602852-97D7-4168-8470-9C46CF25E501">
+          <File Id="Fld_10" Source="redist_x64\api-ms-win-core-interlocked-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_11" Guid="C5FFCADA-B587-4AFD-88DE-17C248C0C840">
+          <File Id="Fld_11" Source="redist_x64\api-ms-win-core-libraryloader-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_12" Guid="C1A51201-FA7C-4CBF-89AC-5732B3DE1AF6">
+          <File Id="Fld_12" Source="redist_x64\api-ms-win-core-localization-l1-2-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_13" Guid="C8A1C881-38B7-4D6F-AD29-AF45397F37A0">
+          <File Id="Fld_13" Source="redist_x64\api-ms-win-core-memory-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_14" Guid="B333D23B-44F4-470E-A01C-33342C7F5104">
+          <File Id="Fld_14" Source="redist_x64\api-ms-win-core-namedpipe-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_15" Guid="74A810F6-C9E4-46EE-A137-4DCF38A6632A">
+          <File Id="Fld_15" Source="redist_x64\api-ms-win-core-path-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_16" Guid="13A89428-155B-4022-A2EF-0988A22CEBC0">
+          <File Id="Fld_16" Source="redist_x64\api-ms-win-core-processenvironment-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_17" Guid="A6F49899-1F58-4259-AED2-868F73DD9647">
+          <File Id="Fld_17" Source="redist_x64\api-ms-win-core-processthreads-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_18" Guid="9B480967-FB77-4BE0-8174-8568E22C235E">
+          <File Id="Fld_18" Source="redist_x64\api-ms-win-core-processthreads-l1-1-1.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_19" Guid="660DEA63-E148-4491-8558-0A6308897482">
+          <File Id="Fld_19" Source="redist_x64\api-ms-win-core-profile-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_20" Guid="7BB8099C-27DB-4E7A-A6DE-3BD537410587">
+          <File Id="Fld_20" Source="redist_x64\api-ms-win-core-rtlsupport-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_21" Guid="79451DB5-BDC6-4437-8F67-630669CC84DD">
+          <File Id="Fld_21" Source="redist_x64\api-ms-win-core-string-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_22" Guid="22E7A2CE-7AD8-4B42-B0AA-DAA03D3E6731">
+          <File Id="Fld_22" Source="redist_x64\api-ms-win-core-synch-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_23" Guid="B53DC919-BCCC-495C-985F-489EFC659C16">
+          <File Id="Fld_23" Source="redist_x64\api-ms-win-core-synch-l1-2-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_24" Guid="1C6BEF47-F527-4329-B4DC-D5343ADFB1BE">
+          <File Id="Fld_24" Source="redist_x64\api-ms-win-core-sysinfo-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_25" Guid="49BF089F-3B16-47D4-A85B-E2E2A478DAD7">
+          <File Id="Fld_25" Source="redist_x64\api-ms-win-core-timezone-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_26" Guid="060746C2-5C9B-4E2E-883B-0BBF36B48286">
+          <File Id="Fld_26" Source="redist_x64\api-ms-win-core-util-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_27" Guid="0C9326DC-9DF5-4BB0-8FB6-0C94A79C0C1C">
+          <File Id="Fld_27" Source="redist_x64\api-ms-win-crt-conio-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_28" Guid="F1ECB7E5-CB73-44ED-87B3-5664AE0FAF03">
+          <File Id="Fld_28" Source="redist_x64\api-ms-win-crt-convert-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_29" Guid="4852C675-4BB7-4799-B17F-93AC8591D972">
+          <File Id="Fld_29" Source="redist_x64\api-ms-win-crt-environment-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_30" Guid="EB2402AB-B6F7-4019-81D3-5A1A3D943829">
+          <File Id="Fld_30" Source="redist_x64\api-ms-win-crt-filesystem-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_31" Guid="081CC686-9740-4B90-A73E-6DCE53140D96">
+          <File Id="Fld_31" Source="redist_x64\api-ms-win-crt-heap-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_32" Guid="BE84C691-3FFA-4667-9496-CBC65C79595C">
+          <File Id="Fld_32" Source="redist_x64\api-ms-win-crt-locale-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_33" Guid="970EF2DA-19BD-43C2-96A7-997664F58DC4">
+          <File Id="Fld_33" Source="redist_x64\api-ms-win-crt-math-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_34" Guid="8F63F3C3-ACBE-4B55-9AB6-3D1C6B36AACD">
+          <File Id="Fld_34" Source="redist_x64\api-ms-win-crt-multibyte-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_35" Guid="C22CADCF-F89D-4373-8C80-9213EE78A70B">
+          <File Id="Fld_35" Source="redist_x64\api-ms-win-crt-private-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_36" Guid="3BA29805-CDD8-4B41-A9FB-B48CFD44871D">
+          <File Id="Fld_36" Source="redist_x64\api-ms-win-crt-process-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_37" Guid="2D84B0F1-0EE2-4510-9065-6E8F2D4A3C8A">
+          <File Id="Fld_37" Source="redist_x64\api-ms-win-crt-runtime-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_38" Guid="0656205C-FBD8-4606-974C-7EBC5D956E3B">
+          <File Id="Fld_38" Source="redist_x64\api-ms-win-crt-stdio-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_39" Guid="BD626AE0-0476-47EA-BAEA-D112CA93C084">
+          <File Id="Fld_39" Source="redist_x64\api-ms-win-crt-string-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_40" Guid="DBCDB008-5CB8-4B1B-8CA9-554BDFF5CEC6">
+          <File Id="Fld_40" Source="redist_x64\api-ms-win-crt-time-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_41" Guid="11605B72-8687-45A0-B517-1E73EBC05B4B">
+          <File Id="Fld_41" Source="redist_x64\api-ms-win-crt-utility-l1-1-0.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_42" Guid="19DA0385-94AB-4B11-B479-FED612641477">
+          <File Id="Fld_42" Source="redist_x64\d3dcompiler_47.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_43" Guid="B3C45C58-3395-4160-9E33-50399DE00EC6">
+          <File Id="Fld_43" Source="redist_x64\msvcp140.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_44" Guid="439223E9-0939-425C-AD7E-CAE3625ABAAF">
+          <File Id="Fld_44" Source="redist_x64\msvcp140_1.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_45" Guid="5D3BA907-EA84-4045-9576-61738767613E">
+          <File Id="Fld_45" Source="redist_x64\msvcp140_2.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_46" Guid="DF9014FC-3CCA-48CB-8AB5-0669334A5EEA">
+          <File Id="Fld_46" Source="redist_x64\msvcp140_atomic_wait.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_47" Guid="5CAED725-38C3-4981-977F-F2F0D5C5BA60">
+          <File Id="Fld_47" Source="redist_x64\msvcp140_codecvt_ids.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_48" Guid="377BB06C-9BDC-483B-A173-734B2C54F3ED">
+          <File Id="Fld_48" Source="redist_x64\ucrtbase.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_49" Guid="66272FBF-E866-4C66-86BD-4B9F312FC25D">
+          <File Id="Fld_49" Source="redist_x64\vcruntime140.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_50" Guid="C49273D9-1510-4E6F-B424-A4D07BEC5FF9">
+          <File Id="Fld_50" Source="redist_x64\vcruntime140_1.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="Redist_51" Guid="028E7A3F-DD2A-4E0F-AB4C-E18C18F06DBF">
+          <File Id="Fld_51" Source="redist_x64\vcruntime140_threads.dll" KeyPath="yes" />
+        </Component>
+
 
         <Directory Id="DataFolder" Name="data">
           <Component Id="AppSoFile" Guid="D4E5F6A1-B2C3-0123-CDEF-123456789012">
@@ -126,6 +282,60 @@
       <ComponentRef Id="Img2" />
       <ComponentRef Id="Img3" />
       <ComponentRef Id="Img4" />
+          <!-- Unified Runtime Component References -->
+      <ComponentRef Id="Redist_1" />
+      <ComponentRef Id="Redist_2" />
+      <ComponentRef Id="Redist_3" />
+      <ComponentRef Id="Redist_4" />
+      <ComponentRef Id="Redist_5" />
+      <ComponentRef Id="Redist_6" />
+      <ComponentRef Id="Redist_7" />
+      <ComponentRef Id="Redist_8" />
+      <ComponentRef Id="Redist_9" />
+      <ComponentRef Id="Redist_10" />
+      <ComponentRef Id="Redist_11" />
+      <ComponentRef Id="Redist_12" />
+      <ComponentRef Id="Redist_13" />
+      <ComponentRef Id="Redist_14" />
+      <ComponentRef Id="Redist_15" />
+      <ComponentRef Id="Redist_16" />
+      <ComponentRef Id="Redist_17" />
+      <ComponentRef Id="Redist_18" />
+      <ComponentRef Id="Redist_19" />
+      <ComponentRef Id="Redist_20" />
+      <ComponentRef Id="Redist_21" />
+      <ComponentRef Id="Redist_22" />
+      <ComponentRef Id="Redist_23" />
+      <ComponentRef Id="Redist_24" />
+      <ComponentRef Id="Redist_25" />
+      <ComponentRef Id="Redist_26" />
+      <ComponentRef Id="Redist_27" />
+      <ComponentRef Id="Redist_28" />
+      <ComponentRef Id="Redist_29" />
+      <ComponentRef Id="Redist_30" />
+      <ComponentRef Id="Redist_31" />
+      <ComponentRef Id="Redist_32" />
+      <ComponentRef Id="Redist_33" />
+      <ComponentRef Id="Redist_34" />
+      <ComponentRef Id="Redist_35" />
+      <ComponentRef Id="Redist_36" />
+      <ComponentRef Id="Redist_37" />
+      <ComponentRef Id="Redist_38" />
+      <ComponentRef Id="Redist_39" />
+      <ComponentRef Id="Redist_40" />
+      <ComponentRef Id="Redist_41" />
+      <ComponentRef Id="Redist_42" />
+      <ComponentRef Id="Redist_43" />
+      <ComponentRef Id="Redist_44" />
+      <ComponentRef Id="Redist_45" />
+      <ComponentRef Id="Redist_46" />
+      <ComponentRef Id="Redist_47" />
+      <ComponentRef Id="Redist_48" />
+      <ComponentRef Id="Redist_49" />
+      <ComponentRef Id="Redist_50" />
+      <ComponentRef Id="Redist_51" />
+
     </Feature>
   </Package>
 </Wix>
+

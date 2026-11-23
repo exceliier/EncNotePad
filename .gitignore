@@ -22,3 +22,9 @@ test_vault.enp
 .vscode/
 .idea/
 *.iml
+
+# Build Installers & Bundled redistributable binaries
+installer/redist_x64/
+*.msi
+*.wixpdb
+*.zip

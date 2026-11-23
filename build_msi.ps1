@@ -160,7 +160,80 @@ if (-not (Test-Path $ReleaseExe)) {
 }
 Write-Success "Flutter Release executable verified: $ReleaseExe"
 
-# 6. Build MSI Package using WiX v4
+# 6. Ensure Unified Redistributable DLLs (Auto-populated if missing)
+$RedistDir = Join-Path $InstallerDir "redist_x64"
+if (-not (Test-Path "$RedistDir\ucrtbase.dll") -or -not (Test-Path "$RedistDir\api-ms-win-core-path-l1-1-0.dll")) {
+    Write-Step "Auto-populating unified redistributable DLLs for Windows 8.1 / 10 / 11..."
+    if (-not (Test-Path $RedistDir)) {
+        New-Item -ItemType Directory -Path $RedistDir -Force | Out-Null
+    }
+
+    # 1. Copy VC++ Runtime & d3dcompiler
+    $MsvcBin = Get-ChildItem -Path "C:\Program Files\Microsoft Visual Studio\2022\*\VC\Tools\MSVC\*\bin\Hostx64\x64" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($MsvcBin) {
+        $vcDlls = @("msvcp140.dll", "msvcp140_1.dll", "msvcp140_2.dll", "msvcp140_atomic_wait.dll", "msvcp140_codecvt_ids.dll", "vcruntime140.dll", "vcruntime140_1.dll", "vcruntime140_threads.dll", "d3dcompiler_47.dll")
+        foreach ($dll in $vcDlls) {
+            $src = Join-Path $MsvcBin.FullName $dll
+            if (Test-Path $src) {
+                Copy-Item -Path $src -Destination $RedistDir -Force
+            }
+        }
+    }
+
+    # 2. Copy UCRT DLLs
+    $UcrtDirs = Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\Redist\*\ucrt\DLLs\x64" -ErrorAction SilentlyContinue
+    if (-not $UcrtDirs) {
+        $UcrtDirs = Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\Redist\ucrt\DLLs\x64" -ErrorAction SilentlyContinue
+    }
+    if ($UcrtDirs) {
+        $targetUcrt = $UcrtDirs | Select-Object -Last 1
+        Get-ChildItem -Path $targetUcrt.FullName -Filter "*.dll" | ForEach-Object {
+            Copy-Item -Path $_.FullName -Destination $RedistDir -Force
+        }
+    }
+
+    # 3. Compile the api-ms-win-core-path forwarder for Windows 8.1 if missing
+    $shimDll = Join-Path $RedistDir "api-ms-win-core-path-l1-1-0.dll"
+    if (-not (Test-Path $shimDll) -and $MsvcBin) {
+        $clExe = Join-Path $MsvcBin.FullName "cl.exe"
+        if (Test-Path $clExe) {
+            $shimSrc = @"
+#pragma comment(linker, "/export:PathAllocCanonicalize=KERNELBASE.PathAllocCanonicalize")
+#pragma comment(linker, "/export:PathAllocCombine=KERNELBASE.PathAllocCombine")
+#pragma comment(linker, "/export:PathCchAddBackslash=KERNELBASE.PathCchAddBackslash")
+#pragma comment(linker, "/export:PathCchAddBackslashEx=KERNELBASE.PathCchAddBackslashEx")
+#pragma comment(linker, "/export:PathCchAddExtension=KERNELBASE.PathCchAddExtension")
+#pragma comment(linker, "/export:PathCchAppend=KERNELBASE.PathCchAppend")
+#pragma comment(linker, "/export:PathCchAppendEx=KERNELBASE.PathCchAppendEx")
+#pragma comment(linker, "/export:PathCchCanonicalize=KERNELBASE.PathCchCanonicalize")
+#pragma comment(linker, "/export:PathCchCanonicalizeEx=KERNELBASE.PathCchCanonicalizeEx")
+#pragma comment(linker, "/export:PathCchCombine=KERNELBASE.PathCchCombine")
+#pragma comment(linker, "/export:PathCchCombineEx=KERNELBASE.PathCchCombineEx")
+#pragma comment(linker, "/export:PathCchFindExtension=KERNELBASE.PathCchFindExtension")
+#pragma comment(linker, "/export:PathCchIsRoot=KERNELBASE.PathCchIsRoot")
+#pragma comment(linker, "/export:PathCchRemoveBackslash=KERNELBASE.PathCchRemoveBackslash")
+#pragma comment(linker, "/export:PathCchRemoveBackslashEx=KERNELBASE.PathCchRemoveBackslashEx")
+#pragma comment(linker, "/export:PathCchRemoveExtension=KERNELBASE.PathCchRemoveExtension")
+#pragma comment(linker, "/export:PathCchRemoveFileSpec=KERNELBASE.PathCchRemoveFileSpec")
+#pragma comment(linker, "/export:PathCchRenameExtension=KERNELBASE.PathCchRenameExtension")
+#pragma comment(linker, "/export:PathCchSkipRoot=KERNELBASE.PathCchSkipRoot")
+#pragma comment(linker, "/export:PathCchStripPrefix=KERNELBASE.PathCchStripPrefix")
+#pragma comment(linker, "/export:PathCchStripToRoot=KERNELBASE.PathCchStripToRoot")
+
+int __stdcall _DllMainCRTStartup(void* hinstDLL, unsigned long fdwReason, void* lpvReserved) {
+    return 1;
+}
+"@
+            $tempC = Join-Path $InstallerDir "path_shim_temp.c"
+            $shimSrc | Out-File -FilePath $tempC -Encoding ascii
+            & $clExe /LD /O2 $tempC /link /NODEFAULTLIB /ENTRY:_DllMainCRTStartup /out:$shimDll | Out-Null
+            Remove-Item $tempC, "$InstallerDir\path_shim_temp.*" -ErrorAction SilentlyContinue
+        }
+    }
+}
+Write-Success "Redistributable DLLs verified in: $RedistDir ($((Get-ChildItem -Path $RedistDir).Count) files)"
+
+# 7. Build MSI Package using WiX v4
 Write-Step "Building Windows MSI Installer package using WiX Toolset v4..."
 
 if (-not (Test-Path $WxsFile)) {
