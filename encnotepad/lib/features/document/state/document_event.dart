@@ -1,3 +1,4 @@
+import 'dart:async';
 import '../../shadow_copies/domain/shadow_model.dart';
 
 abstract class DocumentEvent {}
@@ -39,6 +40,15 @@ class ReorderSectionEvent extends DocumentEvent {
 class ToggleSectionCollapseEvent extends DocumentEvent {
   final String sectionId;
   ToggleSectionCollapseEvent({required this.sectionId});
+}
+
+class CollapseAllSectionsEvent extends DocumentEvent {}
+
+class ExpandAllSectionsEvent extends DocumentEvent {}
+
+class EnsureSectionExpandedEvent extends DocumentEvent {
+  final String sectionId;
+  EnsureSectionExpandedEvent({required this.sectionId});
 }
 
 class AddPartEvent extends DocumentEvent {
@@ -93,4 +103,16 @@ class LockDocumentEvent extends DocumentEvent {}
 class UnlockDocumentEvent extends DocumentEvent {
   final String password;
   UnlockDocumentEvent({required this.password});
+}
+
+class ChangeMasterPasswordEvent extends DocumentEvent {
+  final String currentPassword;
+  final String newPassword;
+  final Completer<String?>? completer;
+
+  ChangeMasterPasswordEvent({
+    required this.currentPassword,
+    required this.newPassword,
+    this.completer,
+  });
 }

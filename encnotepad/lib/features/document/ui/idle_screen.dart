@@ -1,12 +1,52 @@
+import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../core/storage/app_preferences.dart';
 import '../state/document_bloc.dart';
 import '../state/document_event.dart';
 import '../../auth_lock/ui/password_strength.dart';
 
-class IdleScreen extends StatelessWidget {
+class IdleScreen extends StatefulWidget {
   const IdleScreen({super.key});
+
+  @override
+  State<IdleScreen> createState() => _IdleScreenState();
+}
+
+class _IdleScreenState extends State<IdleScreen> {
+  String? _lastOpenedPath;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLastOpenedPath();
+  }
+
+  Future<void> _checkLastOpenedPath() async {
+    final lastPath = await AppPreferences.getLastOpenedPath();
+    if (lastPath != null && File(lastPath).existsSync()) {
+      if (mounted) {
+        setState(() {
+          _lastOpenedPath = lastPath;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleOpenPath(BuildContext context, String path) async {
+    final password = await showDialog<String>(
+      context: context,
+      builder: (ctx) => const _OpenPasswordDialog(),
+    );
+
+    if (password != null && context.mounted) {
+      context.read<DocumentBloc>().add(OpenDocumentEvent(
+            filePath: path,
+            password: password,
+          ));
+    }
+  }
 
   Future<void> _handleNew(BuildContext context) async {
     final path = await FilePicker.platform.saveFile(
@@ -40,18 +80,7 @@ class IdleScreen extends StatelessWidget {
 
     if (result == null || result.files.single.path == null || !context.mounted) return;
     final path = result.files.single.path!;
-
-    final password = await showDialog<String>(
-      context: context,
-      builder: (ctx) => const _OpenPasswordDialog(),
-    );
-
-    if (password != null && context.mounted) {
-      context.read<DocumentBloc>().add(OpenDocumentEvent(
-            filePath: path,
-            password: password,
-          ));
-    }
+    await _handleOpenPath(context, path);
   }
 
   @override
@@ -59,7 +88,7 @@ class IdleScreen extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Container(
-          width: 480,
+          width: 500,
           padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
             color: const Color(0xFF252538),
@@ -81,7 +110,50 @@ class IdleScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 12, color: Colors.white60),
               ),
-              const SizedBox(height: 32),
+              if (_lastOpenedPath != null) ...[
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E1E2C),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFF38384E)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.history, size: 20, color: Colors.lightBlueAccent),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Last opened document',
+                              style: TextStyle(fontSize: 11, color: Colors.white54),
+                            ),
+                            Text(
+                              _lastOpenedPath!.split(RegExp(r'[/\\]')).last,
+                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        ),
+                        onPressed: () => _handleOpenPath(context, _lastOpenedPath!),
+                        child: const Text('Open'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 28),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

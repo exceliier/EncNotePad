@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'core/storage/app_preferences.dart';
 import 'core/storage/windows_file_association.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth_lock/ui/lock_screen.dart';
@@ -21,6 +22,14 @@ void main(List<String> args) async {
     if (cleanPath.toLowerCase().endsWith('.enp') && File(cleanPath).existsSync()) {
       initialFilePath = cleanPath;
       break;
+    }
+  }
+
+  // If no document specified via CLI, check for remembered last opened document path
+  if (initialFilePath == null) {
+    final lastPath = await AppPreferences.getLastOpenedPath();
+    if (lastPath != null && File(lastPath).existsSync()) {
+      initialFilePath = lastPath;
     }
   }
 

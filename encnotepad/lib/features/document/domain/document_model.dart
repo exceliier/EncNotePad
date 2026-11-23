@@ -108,11 +108,11 @@ class SectionModel {
     required this.parts,
   });
 
-  factory SectionModel.create({String? title, int order = 0}) {
+  factory SectionModel.create({String? title, int order = 0, bool isCollapsed = false}) {
     return SectionModel(
       id: 'sec_${const Uuid().v4()}',
       title: title ?? 'New Section',
-      isCollapsed: false,
+      isCollapsed: isCollapsed,
       order: order,
       parts: [PartModel.create()],
     );
@@ -164,7 +164,7 @@ class DocumentModel {
   factory DocumentModel.create({String? firstSectionTitle}) {
     return DocumentModel(
       meta: DocumentMeta.create(),
-      sections: [SectionModel.create(title: firstSectionTitle ?? 'Default Section')],
+      sections: [SectionModel.create(title: firstSectionTitle ?? 'Default Section', isCollapsed: true)],
     );
   }
 

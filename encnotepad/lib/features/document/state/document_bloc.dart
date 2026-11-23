@@ -9,6 +9,7 @@ import '../../../core/crypto/aes_gcm_service.dart';
 import '../../../core/crypto/crypto_isolate.dart';
 import '../../../core/crypto/session_key_holder.dart';
 import '../../../core/storage/atomic_file_writer.dart';
+import '../../../core/storage/app_preferences.dart';
 import '../../../core/storage/binary_file_format.dart';
 import '../../../core/storage/shadow_copy_manager.dart';
 import '../../../core/utils/debouncer.dart';
@@ -43,6 +44,9 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     on<DeleteSectionEvent>(_onDeleteSection);
     on<ReorderSectionEvent>(_onReorderSection);
     on<ToggleSectionCollapseEvent>(_onToggleSectionCollapse);
+    on<CollapseAllSectionsEvent>(_onCollapseAllSections);
+    on<ExpandAllSectionsEvent>(_onExpandAllSections);
+    on<EnsureSectionExpandedEvent>(_onEnsureSectionExpanded);
     on<AddPartEvent>(_onAddPart);
     on<DeletePartEvent>(_onDeletePart);
     on<UpdatePartEvent>(_onUpdatePart);
@@ -53,6 +57,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     on<CloseDocumentEvent>(_onCloseDocument);
     on<LockDocumentEvent>(_onLockDocument);
     on<UnlockDocumentEvent>(_onUnlockDocument);
+    on<ChangeMasterPasswordEvent>(_onChangeMasterPassword);
   }
 
   void _touchUserActivity() {
@@ -107,6 +112,9 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
       ));
 
       await AtomicFileWriter.writeAtomic(event.filePath, packed);
+
+      // Remember path of last opened document
+      await AppPreferences.setLastOpenedPath(event.filePath);
 
       // Create initial baseline shadow copy
       final baselineShadow = await ShadowCopyManager.createShadowCopy(
@@ -168,11 +176,15 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
         );
 
         final doc = DocumentMapper.fromBytes(decryptedBytes);
+        // Requirement 1: On load all sections need to be in collapsed state
+        final collapsedDoc = doc.copyWith(
+          sections: doc.sections.map((s) => s.copyWith(isCollapsed: true)).toList(),
+        );
 
         // Baseline shadow copy on successful open
         final baselineShadow = await ShadowCopyManager.createShadowCopy(
           documentPath: event.filePath,
-          document: doc,
+          document: collapsedDoc,
           sessionKeyHolder: sessionKeyHolder,
           salt: packed.salt,
           kdfId: packed.kdfId,
@@ -181,11 +193,14 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
 
         final manifest = await ShadowCopyManager.loadManifest(event.filePath, sessionKeyHolder);
 
+        // Requirement 2: Remember path of last opened document
+        await AppPreferences.setLastOpenedPath(event.filePath);
+
         _inactivityTracker.start();
         _startMilestoneTimer();
 
         emit(DocumentActiveState(
-          document: doc,
+          document: collapsedDoc,
           filePath: event.filePath,
           salt: packed.salt,
           kdfId: packed.kdfId,
@@ -194,7 +209,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
         ));
       } catch (_) {
         // Enforce 500ms anti-brute-force delay on password failure
-        await Future.delayed(const Duration(milliseconds: 500));
+        await Future<void>.delayed(const Duration(milliseconds: 500));
         sessionKeyHolder.wipe();
         emit(DocumentErrorState(errorMessage: 'Incorrect master password or corrupted file.'));
       }
@@ -298,6 +313,35 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     }).toList();
     emit(current.copyWith(document: current.document.copyWith(sections: sections), isDirty: true));
     _scheduleAutoSave();
+  }
+
+  void _onCollapseAllSections(CollapseAllSectionsEvent event, Emitter<DocumentState> emit) {
+    if (state is! DocumentActiveState) return;
+    _touchUserActivity();
+    final current = state as DocumentActiveState;
+    final sections = current.document.sections.map((s) => s.copyWith(isCollapsed: true)).toList();
+    emit(current.copyWith(document: current.document.copyWith(sections: sections)));
+  }
+
+  void _onExpandAllSections(ExpandAllSectionsEvent event, Emitter<DocumentState> emit) {
+    if (state is! DocumentActiveState) return;
+    _touchUserActivity();
+    final current = state as DocumentActiveState;
+    final sections = current.document.sections.map((s) => s.copyWith(isCollapsed: false)).toList();
+    emit(current.copyWith(document: current.document.copyWith(sections: sections)));
+  }
+
+  void _onEnsureSectionExpanded(EnsureSectionExpandedEvent event, Emitter<DocumentState> emit) {
+    if (state is! DocumentActiveState) return;
+    _touchUserActivity();
+    final current = state as DocumentActiveState;
+    final sections = current.document.sections.map((s) {
+      if (s.id == event.sectionId) {
+        return s.copyWith(isCollapsed: false);
+      }
+      return s;
+    }).toList();
+    emit(current.copyWith(document: current.document.copyWith(sections: sections)));
   }
 
   void _onAddPart(AddPartEvent event, Emitter<DocumentState> emit) {
@@ -601,7 +645,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
           statusText: 'Document unlocked',
         ));
       } catch (_) {
-        await Future.delayed(const Duration(milliseconds: 500));
+        await Future<void>.delayed(const Duration(milliseconds: 500));
         sessionKeyHolder.wipe();
         emit(DocumentLockedState(
           filePath: locked.filePath,
@@ -617,6 +661,125 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
         kdfId: locked.kdfId,
         errorMessage: 'Unlock failed: $e',
       ));
+    }
+  }
+
+  Future<void> _onChangeMasterPassword(
+    ChangeMasterPasswordEvent event,
+    Emitter<DocumentState> emit,
+  ) async {
+    if (state is! DocumentActiveState) {
+      event.completer?.complete('No active document open.');
+      return;
+    }
+    _touchUserActivity();
+    final current = state as DocumentActiveState;
+
+    if (event.newPassword.length < 8) {
+      event.completer?.complete('New password must be at least 8 characters long.');
+      return;
+    }
+
+    try {
+      // 1. Verify current password by deriving key with current salt & kdfId
+      final currentKdf = await CryptoIsolate.deriveKeyInIsolate(
+        password: event.currentPassword,
+        salt: current.salt,
+        kdfId: current.kdfId,
+      );
+
+      // Constant-time key comparison
+      bool keysMatch = true;
+      if (currentKdf.keyBytes.length != sessionKeyHolder.keyBytes.length) {
+        keysMatch = false;
+      } else {
+        int diff = 0;
+        for (int i = 0; i < currentKdf.keyBytes.length; i++) {
+          diff |= currentKdf.keyBytes[i] ^ sessionKeyHolder.keyBytes[i];
+        }
+        keysMatch = diff == 0;
+      }
+
+      if (!keysMatch) {
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        event.completer?.complete('Current password is incorrect.');
+        return;
+      }
+
+      emit(current.copyWith(isSaving: true, statusText: 'Re-encrypting with new master password...'));
+
+      // 2. Derive new key in Isolate with a fresh random salt
+      final newKdf = await CryptoIsolate.deriveKeyInIsolate(password: event.newPassword);
+      final newKeyHolder = SessionKeyHolder()..setKey(newKdf.keyBytes);
+
+      // 3. Re-encrypt active document
+      final docBytes = DocumentMapper.toBytes(current.document);
+      final freshNonce = AesGcmService.generateNonce();
+      final header = EnpPackedFile(
+        version: CryptoConstants.currentVersion,
+        kdfId: newKdf.kdfId,
+        salt: newKdf.salt,
+        nonce: freshNonce,
+        ciphertext: Uint8List(0),
+        authTag: Uint8List(0),
+      ).headerBytes;
+
+      final encrypted = await CryptoIsolate.encryptInIsolate(
+        plaintext: docBytes,
+        keyBytes: newKeyHolder.keyBytes,
+        nonce: freshNonce,
+        aad: header,
+      );
+
+      final packed = BinaryFileFormat.pack(EnpPackedFile(
+        version: CryptoConstants.currentVersion,
+        kdfId: newKdf.kdfId,
+        salt: newKdf.salt,
+        nonce: encrypted['nonce']!,
+        ciphertext: encrypted['ciphertext']!,
+        authTag: encrypted['tag']!,
+      ));
+
+      await AtomicFileWriter.writeAtomic(current.filePath, packed);
+
+      // 4. Rekey existing shadow copies
+      await ShadowCopyManager.rekeyShadowCopies(
+        documentPath: current.filePath,
+        oldKeyHolder: sessionKeyHolder,
+        newKeyHolder: newKeyHolder,
+        newSalt: newKdf.salt,
+        newKdfId: newKdf.kdfId,
+      );
+
+      // 5. Create a snapshot recording password change
+      await ShadowCopyManager.createShadowCopy(
+        documentPath: current.filePath,
+        document: current.document,
+        sessionKeyHolder: newKeyHolder,
+        salt: newKdf.salt,
+        kdfId: newKdf.kdfId,
+        trigger: ShadowTrigger.manual,
+      );
+
+      final manifest = await ShadowCopyManager.loadManifest(current.filePath, newKeyHolder);
+
+      // 6. Update active session key & wipe temporary
+      sessionKeyHolder.setKey(newKdf.keyBytes);
+      newKeyHolder.wipe();
+
+      emit(current.copyWith(
+        salt: newKdf.salt,
+        kdfId: newKdf.kdfId,
+        isDirty: false,
+        isSaving: false,
+        shadowCopies: manifest,
+        statusText: 'Master password changed successfully',
+      ));
+
+      event.completer?.complete(null);
+    } catch (e) {
+      emit(current.copyWith(isSaving: false, statusText: 'Password change failed: $e'));
+      event.completer?.complete('Failed to change password: $e');
     }
   }
 

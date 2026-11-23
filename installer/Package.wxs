@@ -1,0 +1,131 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="EncNotePad"
+           Manufacturer="EncNotePad Team"
+           Version="1.0.0.0"
+           UpgradeCode="B7864B8F-883A-4E38-9B9D-23F7E50C2C39"
+           Scope="perUserOrMachine">
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of EncNotePad is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="EncNotePad">
+        <Component Id="MainExecutable" Guid="3CE234DF-57BE-45E5-9DDF-1234567890AB">
+          <File Id="EncNotePadExe"
+                Source="..\encnotepad\build\windows\x64\runner\Release\encnotepad.exe"
+                KeyPath="yes">
+            <Shortcut Id="AppStartMenuShortcut"
+                      Directory="ProgramMenuFolder"
+                      Name="EncNotePad"
+                      WorkingDirectory="INSTALLFOLDER"
+                      Advertise="yes" />
+            <Shortcut Id="AppDesktopShortcut"
+                      Directory="DesktopFolder"
+                      Name="EncNotePad"
+                      WorkingDirectory="INSTALLFOLDER"
+                      Advertise="yes" />
+          </File>
+
+          <ProgId Id="EncNotePad.Document" Description="EncNotePad Encrypted Document" Icon="EncNotePadExe" IconIndex="0">
+            <Extension Id="enp">
+              <Verb Id="open" Command="Open with EncNotePad" TargetFile="EncNotePadExe" Argument="&quot;%1&quot;" />
+            </Extension>
+          </ProgId>
+        </Component>
+
+        <Component Id="FlutterDll" Guid="A1B2C3D4-E5F6-7890-ABCD-EF1234567890">
+          <File Source="..\encnotepad\build\windows\x64\runner\Release\flutter_windows.dll" KeyPath="yes" />
+        </Component>
+
+        <Component Id="WindowManagerDll" Guid="B2C3D4E5-F6A1-8901-BCDE-F12345678901">
+          <File Source="..\encnotepad\build\windows\x64\runner\Release\window_manager_plugin.dll" KeyPath="yes" />
+        </Component>
+
+        <Component Id="ScreenRetrieverDll" Guid="C3D4E5F6-A1B2-9012-CDEF-123456789012">
+          <File Source="..\encnotepad\build\windows\x64\runner\Release\screen_retriever_plugin.dll" KeyPath="yes" />
+        </Component>
+
+        <Directory Id="DataFolder" Name="data">
+          <Component Id="AppSoFile" Guid="D4E5F6A1-B2C3-0123-CDEF-123456789012">
+            <File Source="..\encnotepad\build\windows\x64\runner\Release\data\app.so" KeyPath="yes" />
+          </Component>
+          <Component Id="IcudtlDatFile" Guid="E5F6A1B2-C3D4-1234-CDEF-123456789012">
+            <File Source="..\encnotepad\build\windows\x64\runner\Release\data\icudtl.dat" KeyPath="yes" />
+          </Component>
+
+          <Directory Id="FlutterAssetsFolder" Name="flutter_assets">
+            <Component Id="AssetManifestBin" Guid="F1A2B3C4-1234-5678-90AB-CDEF12345671">
+              <File Source="..\encnotepad\build\windows\x64\runner\Release\data\flutter_assets\AssetManifest.bin" KeyPath="yes" />
+            </Component>
+            <Component Id="FontManifestJson" Guid="F1A2B3C4-1234-5678-90AB-CDEF12345672">
+              <File Source="..\encnotepad\build\windows\x64\runner\Release\data\flutter_assets\FontManifest.json" KeyPath="yes" />
+            </Component>
+            <Component Id="NativeAssetsJson" Guid="F1A2B3C4-1234-5678-90AB-CDEF12345673">
+              <File Source="..\encnotepad\build\windows\x64\runner\Release\data\flutter_assets\NativeAssetsManifest.json" KeyPath="yes" />
+            </Component>
+            <Component Id="NoticesZ" Guid="F1A2B3C4-1234-5678-90AB-CDEF12345674">
+              <File Source="..\encnotepad\build\windows\x64\runner\Release\data\flutter_assets\NOTICES.Z" KeyPath="yes" />
+            </Component>
+
+            <Directory Id="AppFontsFolder" Name="fonts">
+              <Component Id="MaterialIconsFont" Guid="F1A2B3C4-1234-5678-90AB-CDEF12345675">
+                <File Source="..\encnotepad\build\windows\x64\runner\Release\data\flutter_assets\fonts\MaterialIcons-Regular.otf" KeyPath="yes" />
+              </Component>
+            </Directory>
+
+            <Directory Id="ShadersFolder" Name="shaders">
+              <Component Id="Shader1" Guid="F1A2B3C4-1234-5678-90AB-CDEF12345676">
+                <File Source="..\encnotepad\build\windows\x64\runner\Release\data\flutter_assets\shaders\ink_sparkle.frag" KeyPath="yes" />
+              </Component>
+              <Component Id="Shader2" Guid="F1A2B3C4-1234-5678-90AB-CDEF12345677">
+                <File Source="..\encnotepad\build\windows\x64\runner\Release\data\flutter_assets\shaders\stretch_effect.frag" KeyPath="yes" />
+              </Component>
+            </Directory>
+
+            <Directory Id="PackagesFolder" Name="packages">
+              <Directory Id="PkgWindowManager" Name="window_manager">
+                <Directory Id="ImagesFolder" Name="images">
+                  <Component Id="Img1" Guid="F1A2B3C4-1234-5678-90AB-CDEF12345678">
+                    <File Source="..\encnotepad\build\windows\x64\runner\Release\data\flutter_assets\packages\window_manager\images\ic_chrome_close.png" KeyPath="yes" />
+                  </Component>
+                  <Component Id="Img2" Guid="F1A2B3C4-1234-5678-90AB-CDEF12345679">
+                    <File Source="..\encnotepad\build\windows\x64\runner\Release\data\flutter_assets\packages\window_manager\images\ic_chrome_maximize.png" KeyPath="yes" />
+                  </Component>
+                  <Component Id="Img3" Guid="F1A2B3C4-1234-5678-90AB-CDEF1234567A">
+                    <File Source="..\encnotepad\build\windows\x64\runner\Release\data\flutter_assets\packages\window_manager\images\ic_chrome_minimize.png" KeyPath="yes" />
+                  </Component>
+                  <Component Id="Img4" Guid="F1A2B3C4-1234-5678-90AB-CDEF1234567B">
+                    <File Source="..\encnotepad\build\windows\x64\runner\Release\data\flutter_assets\packages\window_manager\images\ic_chrome_unmaximize.png" KeyPath="yes" />
+                  </Component>
+                </Directory>
+              </Directory>
+            </Directory>
+          </Directory>
+        </Directory>
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder" />
+    <StandardDirectory Id="DesktopFolder" />
+
+    <Feature Id="Main" Title="EncNotePad Application">
+      <ComponentRef Id="MainExecutable" />
+      <ComponentRef Id="FlutterDll" />
+      <ComponentRef Id="WindowManagerDll" />
+      <ComponentRef Id="ScreenRetrieverDll" />
+      <ComponentRef Id="AppSoFile" />
+      <ComponentRef Id="IcudtlDatFile" />
+      <ComponentRef Id="AssetManifestBin" />
+      <ComponentRef Id="FontManifestJson" />
+      <ComponentRef Id="NativeAssetsJson" />
+      <ComponentRef Id="NoticesZ" />
+      <ComponentRef Id="MaterialIconsFont" />
+      <ComponentRef Id="Shader1" />
+      <ComponentRef Id="Shader2" />
+      <ComponentRef Id="Img1" />
+      <ComponentRef Id="Img2" />
+      <ComponentRef Id="Img3" />
+      <ComponentRef Id="Img4" />
+    </Feature>
+  </Package>
+</Wix>

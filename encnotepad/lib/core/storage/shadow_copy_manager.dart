@@ -227,6 +227,75 @@ class ShadowCopyManager {
     final manifestPath = p.join(shadowDirPath, 'manifest.json.enc');
     await AtomicFileWriter.writeAtomic(manifestPath, packed);
   }
+
+  /// Re-encrypts all existing shadow copies and the manifest using a new session key.
+  static Future<void> rekeyShadowCopies({
+    required String documentPath,
+    required SessionKeyHolder oldKeyHolder,
+    required SessionKeyHolder newKeyHolder,
+    required Uint8List newSalt,
+    required int newKdfId,
+  }) async {
+    final shadowDir = getShadowDirectory(documentPath);
+    final existingManifest = await loadManifest(documentPath, oldKeyHolder);
+    if (existingManifest.isEmpty) return;
+
+    final updatedManifest = <ShadowModel>[];
+
+    for (final shadow in existingManifest) {
+      final file = File(shadow.filePath);
+      if (!await file.exists()) continue;
+
+      try {
+        final bytes = await file.readAsBytes();
+        final packed = BinaryFileFormat.unpack(bytes);
+
+        // Decrypt using old key
+        final decryptedBytes = await CryptoIsolate.decryptInIsolate(
+          ciphertext: packed.ciphertext,
+          keyBytes: oldKeyHolder.keyBytes,
+          nonce: packed.nonce,
+          macTag: packed.authTag,
+          aad: packed.headerBytes,
+        );
+
+        // Re-encrypt using new key
+        final freshNonce = AesGcmService.generateNonce();
+        final header = EnpPackedFile(
+          version: CryptoConstants.currentVersion,
+          kdfId: newKdfId,
+          salt: newSalt,
+          nonce: freshNonce,
+          ciphertext: Uint8List(0),
+          authTag: Uint8List(0),
+        ).headerBytes;
+
+        final encrypted = await CryptoIsolate.encryptInIsolate(
+          plaintext: decryptedBytes,
+          keyBytes: newKeyHolder.keyBytes,
+          nonce: freshNonce,
+          aad: header,
+        );
+
+        final newPacked = BinaryFileFormat.pack(EnpPackedFile(
+          version: CryptoConstants.currentVersion,
+          kdfId: newKdfId,
+          salt: newSalt,
+          nonce: encrypted['nonce']!,
+          ciphertext: encrypted['ciphertext']!,
+          authTag: encrypted['tag']!,
+        ));
+
+        await AtomicFileWriter.writeAtomic(shadow.filePath, newPacked);
+        updatedManifest.add(shadow);
+      } catch (_) {
+        // If an individual snapshot failed to rekey, continue with remaining
+      }
+    }
+
+    // Re-save manifest with new key
+    await _saveEncryptedManifest(shadowDir.path, updatedManifest, newKeyHolder);
+  }
 }
 
 class FileNotFoundException implements Exception {

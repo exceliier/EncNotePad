@@ -6,6 +6,9 @@ class PartTile extends StatefulWidget {
   final PartModel part;
   final int index;
   final int totalParts;
+  final bool isDetailsVisible;
+  final bool isHighlighted;
+  final VoidCallback onToggleDetails;
   final void Function(String? title, String? body) onUpdate;
   final VoidCallback onDelete;
   final void Function(int oldIndex, int newIndex) onReorder;
@@ -16,6 +19,9 @@ class PartTile extends StatefulWidget {
     required this.part,
     required this.index,
     required this.totalParts,
+    required this.isDetailsVisible,
+    this.isHighlighted = false,
+    required this.onToggleDetails,
     required this.onUpdate,
     required this.onDelete,
     required this.onReorder,
@@ -56,27 +62,45 @@ class _PartTileState extends State<PartTile> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: const Color(0xFF222232),
+        color: widget.isHighlighted ? const Color(0xFF2E2E48) : const Color(0xFF222232),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFF38384E)),
+        border: Border.all(
+          color: widget.isHighlighted ? Colors.amberAccent : const Color(0xFF38384E),
+          width: widget.isHighlighted ? 1.8 : 1.0,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
+              IconButton(
+                icon: Icon(
+                  widget.isDetailsVisible ? Icons.visibility : Icons.visibility_off,
+                  size: 18,
+                  color: widget.isDetailsVisible ? Colors.lightBlueAccent : Colors.white60,
+                ),
+                tooltip: widget.isDetailsVisible ? 'Hide Part Details' : 'Show Part Details',
+                onPressed: widget.onToggleDetails,
+              ),
+              const SizedBox(width: 4),
               Expanded(
                 child: TextField(
                   controller: _titleController,
                   style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'Part Title (e.g. Bank Account)',
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    suffixText: !widget.isDetailsVisible && widget.part.body.trim().isNotEmpty
+                        ? '(details hidden)'
+                        : null,
+                    suffixStyle: const TextStyle(fontSize: 11, color: Colors.white38),
                   ),
                   onChanged: (val) => widget.onUpdate(val, null),
                 ),
@@ -101,19 +125,21 @@ class _PartTileState extends State<PartTile> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _bodyController,
-            maxLines: null,
-            keyboardType: TextInputType.multiline,
-            style: const TextStyle(fontSize: 13, height: 1.4),
-            decoration: const InputDecoration(
-              hintText: 'Enter secure details, credentials, or notes...',
-              isDense: true,
-              contentPadding: EdgeInsets.all(8),
+          if (widget.isDetailsVisible) ...[
+            const SizedBox(height: 8),
+            TextField(
+              controller: _bodyController,
+              maxLines: null,
+              keyboardType: TextInputType.multiline,
+              style: const TextStyle(fontSize: 13, height: 1.4),
+              decoration: const InputDecoration(
+                hintText: 'Enter secure details, credentials, or notes...',
+                isDense: true,
+                contentPadding: EdgeInsets.all(8),
+              ),
+              onChanged: (val) => widget.onUpdate(null, val),
             ),
-            onChanged: (val) => widget.onUpdate(null, val),
-          ),
+          ],
         ],
       ),
     );
