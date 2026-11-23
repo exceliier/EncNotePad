@@ -134,6 +134,18 @@ Files saved to disk adhere to a strict, tamper-proof binary specification:
    The compiled executable will be located in:
    `build/windows/x64/runner/Release/`
 
+6. **Build the Windows MSI Installer Package:**
+   Run the automated build script (runs tests, compiles Flutter release, and packages via WiX v4):
+   ```cmd
+   build_msi.bat
+   ```
+   Or via PowerShell:
+   ```powershell
+   .\build_msi.ps1
+   ```
+   The generated installer will be saved at:
+   `EncNotePad-v1.0.0.msi`
+
 ---
 
 ## 🛡️ Privacy & Threat Model
