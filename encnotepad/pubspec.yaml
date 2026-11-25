@@ -21,7 +21,7 @@ dependencies:
   window_manager: ^0.3.8
   path: ^1.9.0
   uuid: ^4.4.0
-  intl: ^0.20.3
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:

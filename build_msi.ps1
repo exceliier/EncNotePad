@@ -119,6 +119,11 @@ if (-not $WixExe) {
 }
 Write-Success "Found WiX Toolset: $WixTool"
 
+# Automatically accept WiX v7+ EULA if needed
+try {
+    & $WixTool eula accept wix7 2>$null | Out-Null
+} catch {}
+
 # 4. Optional: Run Automated Tests
 if (-not $SkipTests) {
     Write-Step "Running automated test suite..."
